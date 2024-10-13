@@ -1,0 +1,7 @@
+index,Emotion,Text,Tag,sentence_id
+3,Fear,nhà thì không xa lắm nhưng chưa bao giờ đi vì sợ bị đè bẹp luôn người,[0. 0. 0. 1. 0. 0. 0.],3
+12,Disgust,ủa má . đứa yêu nhau vô duyên và sân si giống nhau vậy,[0. 1. 0. 0. 0. 0. 0.],12
+17,Enjoyment,nghe ngọt thế,[0. 0. 1. 0. 0. 0. 0.],17
+25,Disgust,có những người không có ý thức bỏ quần áo rách hoặc mặc rồi để vào tủ để đỡ phải đi vứt .,[0. 1. 0. 0. 0. 0. 0.],25
+26,Sadness,per khi ế nhưng vẫn phải giương mắt nhìn bọn nó ân ái,[0. 0. 0. 0. 0. 1. 0.],26
+37,Disgust,này là xạo chó chứ nguyên giá gì . kinh doanh là phải lừa lọc . lừa giỏi diễn đạt thì giàu,[0. 1. 0. 0. 0. 0. 0.],37
