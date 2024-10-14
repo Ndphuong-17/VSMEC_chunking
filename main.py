@@ -79,6 +79,10 @@ def main(args):
         num_epochs=args.num_epochs
     )
 
+    for name, param in model.named_parameters():
+        if param.grad is not None and torch.isnan(param.grad).any():
+            print(f"NaN detected in gradients of {name}")
+
     # Train the model
     train(
         model=model,

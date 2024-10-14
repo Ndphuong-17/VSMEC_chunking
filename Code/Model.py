@@ -96,6 +96,18 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score
 import numpy as np
 
+def check_data(data, device):
+    input_ids = data['input_ids'].squeeze(1).to(device)
+    attention_mask = data['attention_mask'].to(device)
+    labels = data['label'].to(device, dtype=torch.float)
+
+    if torch.isnan(input_ids).any() or torch.isinf(input_ids).any():
+        raise ValueError("Input IDs contain NaN or infinite values")
+    if torch.isnan(attention_mask).any() or torch.isinf(attention_mask).any():
+        raise ValueError("Attention mask contains NaN or infinite values")
+    if torch.isnan(labels).any() or torch.isinf(labels).any():
+        raise ValueError("Labels contain NaN or infinite values")
+
 def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device, num_epochs):
     """
     Train the model with specified parameters.
@@ -118,6 +130,8 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
 
         # Training loop
         for data in tqdm(train_dataloader, desc='Training', leave=False):
+
+            check_data(data, device)
             input_ids = data['input_ids'].squeeze(1).to(device)
             attention_mask = data['attention_mask'].to(device)
             labels = data['label'].to(device, dtype=torch.float)
@@ -125,8 +139,6 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
             optimizer.zero_grad()
 
             # Forward pass
-            print(f"input_ids: {input_ids.shape} \n {input_ids}")
-            print(f"attention_mask: {attention_mask.shape} \n {attention_mask}")
             logits = model(input_ids, attention_mask)
             logits = torch.sigmoid(logits)
 
@@ -135,8 +147,15 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
             loss = criterion(logits, labels)
 
 
-            print(f"Logits: {logits}")
-            print(f"Labels: {labels}")
+            # Check for NaN in logits
+            if torch.isnan(logits).any():
+                print("NaN detected in logits")
+                print("Input IDs:", input_ids)
+                print("Attention Mask:", attention_mask)
+                print("Labels:", labels)
+                break
+
+
             print(f"Loss: {loss}")
 
             # Backward pass and optimization step
