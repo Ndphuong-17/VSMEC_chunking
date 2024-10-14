@@ -128,44 +128,46 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
         total_loss = 0
         print(f'Epoch: {epoch + 1}')
 
-        # Training loop
-        for data in tqdm(train_dataloader, desc='Training', leave=False):
+        
+        with torch.no_grad():
+            # Training loop
+            for data in tqdm(train_dataloader, desc='Training', leave=False):
 
-            check_data(data, device)
-            input_ids = data['input_ids'].squeeze(1).to(device)
-            attention_mask = data['attention_mask'].to(device)
-            labels = data['label'].to(device, dtype=torch.float)
+                check_data(data, device)
+                input_ids = data['input_ids'].squeeze(1).to(device)
+                attention_mask = data['attention_mask'].to(device)
+                labels = data['label'].to(device, dtype=torch.float)
 
-            optimizer.zero_grad()
+                optimizer.zero_grad()
 
-            # Forward pass
-            logits = model(input_ids, attention_mask)
-            logits = torch.sigmoid(logits)
+                # Forward pass
+                logits = model(input_ids, attention_mask)
+                logits = torch.sigmoid(logits)
 
-            # Calculate loss
-            print(f"Logits: {logits.shape}, labels: {labels.shape}")
-            loss = criterion(logits, labels)
-
-
-            # Check for NaN in logits
-            if torch.isnan(logits).any():
-                print("NaN detected in logits")
-                print("Input IDs:", input_ids)
-                print("Attention Mask:", attention_mask)
-                print("Labels:", labels)
-                break
+                # Calculate loss
+                print(f"Logits: {logits.shape}, labels: {labels.shape}")
+                loss = criterion(logits, labels)
 
 
-            print(f"Loss: {loss}")
+                # Check for NaN in logits
+                if torch.isnan(logits).any():
+                    print("NaN detected in logits")
+                    print("Input IDs:", input_ids)
+                    print("Attention Mask:", attention_mask)
+                    print("Labels:", labels)
+                    break
 
-            # Backward pass and optimization step
-            loss.backward()
-            # After loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # You can adjust the max_norm value
 
-            optimizer.step()
+                print(f"Loss: {loss}")
 
-            total_loss += loss.item()
+                # Backward pass and optimization step
+                loss.backward()
+                # After loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # You can adjust the max_norm value
+
+                optimizer.step()
+
+                total_loss += loss.item()
 
         # Validation loop
         model.eval()  # Set model to evaluation mode for validation
