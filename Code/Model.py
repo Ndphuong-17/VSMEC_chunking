@@ -131,6 +131,8 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
             print(f"Logits: {logits.shape}, labels: {labels.shape}")
             loss = criterion(logits, labels)
 
+            print(f"Loss: {loss}")
+
             # Backward pass and optimization step
             loss.backward()
             optimizer.step()
@@ -172,6 +174,7 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
         # Display training and validation losses and metrics
         avg_train_loss = total_loss / len(train_dataloader)
         avg_val_loss = val_loss / len(dev_dataloader)
+        print(f"Training: {len(train_dataloader)}")
         print(f'Training Loss: {avg_train_loss:.4f}')
         print(f'Validation Loss: {avg_val_loss:.4f}')
         print(f'Macro F1-Score: {f1:.4f}')
