@@ -128,6 +128,7 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
             logits = model(input_ids, attention_mask)
 
             # Calculate loss
+            print(f"Logits: {logits.shape}, labels: {labels.shape}")
             loss = criterion(logits, labels)
 
             # Backward pass and optimization step
