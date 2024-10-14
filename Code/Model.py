@@ -12,7 +12,11 @@ class MultiTaskModel(nn.Module):
         super(MultiTaskModel, self).__init__()
         self.embedding_model = embedding_model
         # self.classification_head = classification_model
-        self.classification_head = nn.Linear(768, 7)
+        self.classification_head = nn.Sequential(
+            nn.Linear(768, 512),
+            nn.ReLU(),
+            nn.Linear(512, 7)
+        )
         self.dropout = nn.Dropout(dropout_rate)
 
 
@@ -131,6 +135,9 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
             print(f"Logits: {logits.shape}, labels: {labels.shape}")
             loss = criterion(logits, labels)
 
+
+            print(f"Logits: {logits}")
+            print(f"Labels: {labels}")
             print(f"Loss: {loss}")
 
             # Backward pass and optimization step
