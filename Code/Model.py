@@ -12,11 +12,7 @@ class MultiTaskModel(nn.Module):
         super(MultiTaskModel, self).__init__()
         self.embedding_model = embedding_model
         # self.classification_head = classification_model
-        self.classification_head = nn.Sequential(
-            nn.Linear(768, 512),
-            nn.ReLU(),
-            nn.Linear(512, 7)
-        )
+        self.classification_head = nn.Linear(768, 7)
         self.dropout = nn.Dropout(dropout_rate)
 
 
@@ -130,6 +126,7 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
 
             # Forward pass
             logits = model(input_ids, attention_mask)
+            logits = torch.sigmoid(logits)
 
             # Calculate loss
             print(f"Logits: {logits.shape}, labels: {labels.shape}")
@@ -142,6 +139,9 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
 
             # Backward pass and optimization step
             loss.backward()
+            # After loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # You can adjust the max_norm value
+
             optimizer.step()
 
             total_loss += loss.item()
@@ -159,6 +159,7 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
 
                 # Forward pass for validation
                 logits = model(input_ids, attention_mask)
+                logits = torch.sigmoid(logits)
                 loss = criterion(logits, labels)
                 val_loss += loss.item()
 
@@ -213,6 +214,7 @@ def test(model, test_dataloader, device):
 
             # Forward pass
             logits = model(input_ids, attention_mask)
+            logits = torch.sigmoid(logits)
 
             # Store predictions and targets
             preds.append(logits.cpu())
