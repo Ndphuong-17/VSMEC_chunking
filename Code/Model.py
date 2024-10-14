@@ -125,6 +125,8 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
             optimizer.zero_grad()
 
             # Forward pass
+            print(f"input_ids: {input_ids.shape} \n {input_ids}")
+            print(f"attention_mask: {attention_mask.shape} \n {attention_mask}")
             logits = model(input_ids, attention_mask)
             logits = torch.sigmoid(logits)
 
