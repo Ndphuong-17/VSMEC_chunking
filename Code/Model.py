@@ -47,8 +47,7 @@ class MultiTaskModel(nn.Module):
 
         # Ensure logits shape matches the number of classes
         logits = self.classification_head(pooled_output)  # (batch_size, num_classes)
-        
-        # logits = torch.sigmoid(logits)
+        logits = torch.sigmoid(logits)
 
         return logits
 
@@ -96,18 +95,6 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score
 import numpy as np
 
-def check_data(data, device):
-    input_ids = data['input_ids'].squeeze(1).to(device)
-    attention_mask = data['attention_mask'].to(device)
-    labels = data['label'].to(device, dtype=torch.float)
-
-    if torch.isnan(input_ids).any() or torch.isinf(input_ids).any():
-        raise ValueError("Input IDs contain NaN or infinite values")
-    if torch.isnan(attention_mask).any() or torch.isinf(attention_mask).any():
-        raise ValueError("Attention mask contains NaN or infinite values")
-    if torch.isnan(labels).any() or torch.isinf(labels).any():
-        raise ValueError("Labels contain NaN or infinite values")
-
 def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device, num_epochs):
     """
     Train the model with specified parameters.
@@ -128,11 +115,8 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
         total_loss = 0
         print(f'Epoch: {epoch + 1}')
 
-        
         # Training loop
         for data in tqdm(train_dataloader, desc='Training', leave=False):
-
-            check_data(data, device)
             input_ids = data['input_ids'].squeeze(1).to(device)
             attention_mask = data['attention_mask'].to(device)
             labels = data['label'].to(device, dtype=torch.float)
@@ -141,29 +125,12 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
 
             # Forward pass
             logits = model(input_ids, attention_mask)
-            logits = torch.sigmoid(logits)
 
             # Calculate loss
-            print(f"Logits: {logits.shape}, labels: {labels.shape}")
             loss = criterion(logits, labels)
-
-
-            # Check for NaN in logits
-            if torch.isnan(logits).any():
-                print("NaN detected in logits")
-                print("Input IDs:", input_ids)
-                print("Attention Mask:", attention_mask)
-                print("Labels:", labels)
-                break
-
-
-            print(f"Loss: {loss}")
 
             # Backward pass and optimization step
             loss.backward()
-            # After loss.backward()
-            # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # You can adjust the max_norm value
-
             optimizer.step()
 
             total_loss += loss.item()
@@ -181,7 +148,6 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
 
                 # Forward pass for validation
                 logits = model(input_ids, attention_mask)
-                logits = torch.sigmoid(logits)
                 loss = criterion(logits, labels)
                 val_loss += loss.item()
 
@@ -204,7 +170,6 @@ def train(model, train_dataloader, dev_dataloader, criterion, optimizer, device,
         # Display training and validation losses and metrics
         avg_train_loss = total_loss / len(train_dataloader)
         avg_val_loss = val_loss / len(dev_dataloader)
-        print(f"Training: {len(train_dataloader)}")
         print(f'Training Loss: {avg_train_loss:.4f}')
         print(f'Validation Loss: {avg_val_loss:.4f}')
         print(f'Macro F1-Score: {f1:.4f}')
@@ -236,7 +201,6 @@ def test(model, test_dataloader, device):
 
             # Forward pass
             logits = model(input_ids, attention_mask)
-            logits = torch.sigmoid(logits)
 
             # Store predictions and targets
             preds.append(logits.cpu())
